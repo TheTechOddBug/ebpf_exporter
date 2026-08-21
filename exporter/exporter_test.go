@@ -9,7 +9,9 @@ import (
 
 func TestPopulateKaddrsFrom(t *testing.T) {
 	e := &Exporter{kaddrs: map[string]uint64{}}
-	kallsyms := strings.NewReader("ffffffff81000000 T builtin_symbol\nffffffffc0001000 t module_symbol\t[example]\n")
+	kallsyms := strings.NewReader("ffffffff81000000 T builtin_symbol\n" +
+		"ffffffffc0001000 t module_symbol\t[example]\n" +
+		"ffffffffc0002000 t builtin_symbol\t[example]\n")
 
 	if err := e.populateKaddrsFrom(kallsyms); err != nil {
 		t.Fatal(err)

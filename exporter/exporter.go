@@ -384,7 +384,10 @@ func (e *Exporter) populateKaddrsFrom(r io.Reader) error {
 			return fmt.Errorf("error parsing addr %q from line %q: %w", parts[0], s.Text(), err)
 		}
 
-		e.kaddrs[parts[2]] = addr
+		name := parts[2]
+		if _, ok := e.kaddrs[name]; !ok {
+			e.kaddrs[name] = addr
+		}
 	}
 
 	return s.Err()
