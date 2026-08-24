@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -367,11 +368,14 @@ func (e *Exporter) populateKaddrs() error {
 	}
 
 	defer fd.Close()
+	return e.populateKaddrsFrom(fd)
+}
 
-	s := bufio.NewScanner(fd)
+func (e *Exporter) populateKaddrsFrom(r io.Reader) error {
+	s := bufio.NewScanner(r)
 	for s.Scan() {
-		parts := strings.Split(s.Text(), " ")
-		if len(parts) != 3 {
+		parts := strings.Fields(s.Text())
+		if len(parts) < 3 {
 			continue
 		}
 
@@ -380,7 +384,10 @@ func (e *Exporter) populateKaddrs() error {
 			return fmt.Errorf("error parsing addr %q from line %q: %w", parts[0], s.Text(), err)
 		}
 
-		e.kaddrs[parts[2]] = addr
+		name := parts[2]
+		if _, ok := e.kaddrs[name]; !ok {
+			e.kaddrs[name] = addr
+		}
 	}
 
 	return s.Err()

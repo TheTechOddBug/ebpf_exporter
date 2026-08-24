@@ -3,8 +3,28 @@ package exporter
 import (
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 )
+
+func TestPopulateKaddrsFrom(t *testing.T) {
+	e := &Exporter{kaddrs: map[string]uint64{}}
+	kallsyms := strings.NewReader("ffffffff81000000 T builtin_symbol\n" +
+		"ffffffffc0001000 t module_symbol\t[example]\n" +
+		"ffffffffc0002000 t builtin_symbol\t[example]\n")
+
+	if err := e.populateKaddrsFrom(kallsyms); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := map[string]uint64{
+		"builtin_symbol": 0xffffffff81000000,
+		"module_symbol":  0xffffffffc0001000,
+	}
+	if !reflect.DeepEqual(e.kaddrs, expected) {
+		t.Errorf("expected kaddrs %#v, got %#v", expected, e.kaddrs)
+	}
+}
 
 func TestAggregatedMetricValues(t *testing.T) {
 	values := []metricValue{
